@@ -1,6 +1,6 @@
 #include <iostream>
-#include "CPU.h"
-#include "Renderer.h"
+#include "../Headers/CPU.h"
+#include "../Headers/Renderer.h"
 int main()
 {
 	CPU cpu;

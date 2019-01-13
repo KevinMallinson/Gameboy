@@ -1,4 +1,4 @@
-#include "CPU.h"
+#include "../Headers/CPU.h"
 
 CPU::CPU()
 {
