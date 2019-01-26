@@ -3,40 +3,41 @@
 CPU::CPU()
 {
 	//Initialize our registers
-	A = new int8_t(0);
-	B = new int8_t(0);
-	C = new int8_t(0);
-	D = new int8_t(0);
-	E = new int8_t(0);
-	F = new int8_t(0);
-	H = new int8_t(0);
-	L = new int8_t(0);
+	regA = new uint8_t(0);
+	regB = new uint8_t(0);
+	regC = new uint8_t(0);
+	regD = new uint8_t(0);
+	regE = new uint8_t(0);
+	regF = new uint8_t(0);
+	regH = new uint8_t(0);
+	regL = new uint8_t(0);
 
 	SP = 0;
 	PC = 0;
 	
+	////B, C, D, E, H, L, F, A
 	registers.reserve(8);
-	registers.push_back(A);
-	registers.push_back(B);
-	registers.push_back(C);
-	registers.push_back(D);
-	registers.push_back(E);
-	registers.push_back(F);
-	registers.push_back(H);
-	registers.push_back(L);
+	registers.push_back(regB);
+	registers.push_back(regC);
+	registers.push_back(regD);
+	registers.push_back(regE);
+	registers.push_back(regH);
+	registers.push_back(regL);
+	registers.push_back(regF);
+	registers.push_back(regA);
 }
 
 CPU::~CPU()
 {
 	//Delete our pointers - no need to delete vector (since it's not a pointer at all)
-	delete A;
-	delete B;
-	delete C;
-	delete D;
-	delete E;
-	delete F;
-	delete H;
-	delete L;
+	delete regA;
+	delete regB;
+	delete regC;
+	delete regD;
+	delete regE;
+	delete regF;
+	delete regH;
+	delete regL;
 }
 
 void CPU::Cycle()
@@ -60,33 +61,10 @@ void CPU::Cycle()
 		case 0x68: case 0x69: case 0x6a: case 0x6b: case 0x6c: case 0x6d: case 0x6f: // ld l,reg
 		case 0x78: case 0x79: case 0x7a: case 0x7b: case 0x7c: case 0x7d: case 0x7f: // ld a,reg
 		{
-			int dest = opcode >> 3 & 0b00000111; //bitmask so get only last 3 bits
-			int src = opcode & 0b00000111; //as above
+			uint8_t * dest = registers[opcode >> 3 & 0b00000111]; //bitmask so get only last 3 bits
+			uint8_t * src = registers[opcode & 0b00000111]; //as above
 			LD(dest, src);
 			break;
 		}
 	}
-}
-
-/**
-	Perform No-Operation.
-	@return the number of cycles
-*/
-int CPU::NOP()
-{
-	return 4;
-}
-
-/**
-	Load register B in to register A
-	@param dest the destination register
-	@param src the source register
-	@return the number of cycles
-*/
-int CPU::LD(int dest, int source)
-{
-	//Set the value of dest to the value of source
-	*registers[dest] = *registers[source];
-
-	return 4;
 }
