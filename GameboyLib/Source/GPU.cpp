@@ -18,25 +18,23 @@ GPU::GPU()
 void GPU::SetVideoRam(uint16_t addr, uint8_t val)
 {
 	//Note: possible to overflow the array  
-	uint16_t bitmask = addr & 0x1FFF;
-	videoRam[bitmask] = val;
+	videoRam[addr] = val;
 }
 
-uint8_t GPU::GetVideoRam(uint16_t addr)
+Memory GPU::GetVideoRam(uint16_t addr)
 {
 	//Note: possible to overflow the array
-	uint16_t bitmask = addr & 0x1FFF;
-	return videoRam[bitmask];
+	return Memory(MemoryRegion::VIDEORAM, videoRam[addr], addr);
 }
 
 void GPU::SetSpriteAttributeTable(uint16_t addr, uint8_t val)
 {
 	//Note: possible to overflow the array
-	spriteAttributeTable[addr & 0x00FF] = val;
+	spriteAttributeTable[addr] = val;
 }
 
-uint8_t GPU::GetSpriteAttributeTable(uint16_t addr)
+Memory GPU::GetSpriteAttributeTable(uint16_t addr)
 {
 	//Note: possible to overflow the array
-	return spriteAttributeTable[addr & 0x00FF];
+	return Memory(MemoryRegion::SPRITEATTRIBUTETABLE, spriteAttributeTable[addr], addr);
 }

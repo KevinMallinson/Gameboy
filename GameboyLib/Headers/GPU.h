@@ -2,7 +2,7 @@
 //Using memory map from http://gbdev.gg8.se/wiki/articles/Memory_Map
 
 #include <iostream>
-
+#include "Memory.h"
 class GPU
 {
 public:
@@ -10,10 +10,10 @@ public:
 	GPU();
 
 	void SetVideoRam(uint16_t addr, uint8_t val);
-	uint8_t GetVideoRam(uint16_t addr);
+	Memory GetVideoRam(uint16_t addr);
 
 	void SetSpriteAttributeTable(uint16_t addr, uint8_t val);
-	uint8_t GetSpriteAttributeTable(uint16_t address);
+	Memory GetSpriteAttributeTable(uint16_t address);
 
 
 private:

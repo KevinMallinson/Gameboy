@@ -45,7 +45,7 @@ MMU::MMU(GPU * gpuPtr) :gpu(gpuPtr)
 	@param addr the memory address to read
 	@return the byte at the given address
 */
-uint8_t MMU::GetByte(uint16_t addr)
+Memory MMU::GetByte(uint16_t addr)
 {
 	return SetOrGetMemory(addr, 0, false);
 }
@@ -65,13 +65,18 @@ void MMU::WriteByte(uint16_t addr, uint8_t val)
 	@param addr the memory address to read
 	@return the word at the given address
 */
-uint16_t MMU::GetWord(uint16_t addr)
+Memory MMU::GetWord(uint16_t addr)
 {
 	//its stored in our RAM implementation in little endian
-	uint16_t word = GetByte(addr + 1) << 8; //higher address contains most significant byte
-	word = word | GetByte(addr); //lower address contains least significant byte
+	Memory msb = GetByte(addr + 1); //higher address contains most significant byte
+	Memory lsb = GetByte(addr); //lower address contains least significant byte
 
-	return word;
+	if (msb.Region() != lsb.Region())
+	{
+		throw std::logic_error("WORD IS COMPRISED OF TWO DISTINCT MEMORY REGIONS");
+	}
+
+	return Memory(msb.Region(), (msb.Byte() << 8) | lsb.Byte(), addr);
 }
 
 /**
@@ -93,7 +98,7 @@ void MMU::WriteWord(uint16_t addr, uint16_t val)
 	@param set whether to set (set == true) or get (set == false)
 	@return the byte at address (set == false), or 0 (set == true)
 */
-uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
+Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 {
 	//Using memory map at http://gbdev.gg8.se/wiki/articles/Memory_Map
 	uint8_t byte = 0;
@@ -105,12 +110,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set) 
 		{
-			return romBank[addr]; //addr guaranteed to be 0x0000 to 0x7FFF, thus will fit in RomBank which is 0x8000 in size (including zero).
+			return Memory(MemoryRegion::ROMBANK, romBank[addr], addr); //addr guaranteed to be 0x0000 to 0x7FFF, thus will fit in RomBank which is 0x8000 in size (including zero).
 		}
 		else
 		{
 			romBank[addr] = val;
-			return 0;
+			return Memory(MemoryRegion::SETONLY, 0, 0);
 		}
 		break;
 
@@ -119,12 +124,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set)
 		{
-			return gpu->GetVideoRam(addr);
+			return Memory(MemoryRegion::VIDEORAM, gpu->GetVideoRam(addr & 0x1FFF).Byte(), addr);
 		}
 		else
 		{
-			gpu->SetVideoRam(addr, val);
-			return 0;
+			gpu->SetVideoRam(addr & 0x1FFF, val);
+			return Memory(MemoryRegion::SETONLY, 0, 0);
 		}
 		break;
 
@@ -136,12 +141,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 		//We need to apply a bitmask to reduce the value. In this case, ignoring the first 3 bits serves this purpose.
 		if (!set)
 		{
-			return externalRam[addr & 0x1FFF];
+			return Memory(MemoryRegion::EXTERNALRAM, externalRam[addr & 0x1FFF], addr);
 		}
 		else
 		{
 			externalRam[addr & 0x1FFF] = val;
-			return 0;
+			return Memory(MemoryRegion::SETONLY, 0, 0);
 		}
 		break;
 
@@ -150,12 +155,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set)
 		{
-			return workRam[addr & 0x1FFF];
+			return Memory(MemoryRegion::WORKRAM, workRam[addr & 0x1FFF], addr);
 		}
 		else
 		{
 			workRam[addr & 0x1FFF] = val;
-			return 0;
+			return Memory(MemoryRegion::SETONLY, 0, 0);
 		}
 		break;
 
@@ -163,12 +168,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set)
 		{
-			return echoRam[addr & 0x1FFF]; //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
+			return Memory(MemoryRegion::ECHORAM, echoRam[addr & 0x1FFF], addr); //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
 		}
 		else
 		{
 			echoRam[addr & 0x1FFF] = val;
-			return 0;
+			return Memory(MemoryRegion::SETONLY, 0, 0);
 		}
 		break;
 
@@ -182,12 +187,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 			if (!set)
 			{
-				return echoRam[addr & 0x1FFF]; //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
+				return Memory(MemoryRegion::ECHORAM, echoRam[addr & 0x1FFF], addr); //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
 			}
 			else
 			{
 				echoRam[addr & 0x1FFF] = val;
-				return 0;
+				return Memory(MemoryRegion::SETONLY, 0, 0);
 			}
 			break;
 
@@ -201,12 +206,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 				if (!set)
 				{
-					return gpu->GetSpriteAttributeTable(addr);
+					return Memory(MemoryRegion::SPRITEATTRIBUTETABLE, gpu->GetSpriteAttributeTable(addr & 0x00FF).Byte(), addr);
 				}
 				else
 				{
-					gpu->SetSpriteAttributeTable(addr, val);
-					return 0;
+					gpu->SetSpriteAttributeTable(addr & 0x00FF, val);
+					return Memory(MemoryRegion::SETONLY, 0, 0);
 				}
 				break;
 
@@ -215,12 +220,14 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 				if (!set)
 				{
-					return 0;
+					//Not sure if anything wrong with storing stuff here since it's technically not usable.
+					return Memory(MemoryRegion::UNUSED, unused[addr & 0x7F], addr);
 				}
 				else
 				{
 					//NOP
-					return 0;
+					unused[addr & 0x7F] = val;
+					return Memory(MemoryRegion::SETONLY, 0, 0);
 				}
 
 				break;
@@ -237,12 +244,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 				if (!set)
 				{
-					return ioRegisters[addr & 0x00FF];
+					return Memory(MemoryRegion::IOREGISTERS, ioRegisters[addr & 0x007F], addr);
 				}
 				else
 				{
-					ioRegisters[addr & 0x00FF] = val;
-					return 0;
+					ioRegisters[addr & 0x007F] = val;
+					return Memory(MemoryRegion::SETONLY, 0, 0);
 				}
 				break;
 
@@ -251,12 +258,12 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 				if (!set)
 				{
-					return highRam[addr & 0x007F];
+					return Memory(MemoryRegion::HIGHRAM, highRam[addr & 0x007F], addr);
 				}
 				else
 				{
 					highRam[addr & 0x007F] = val;
-					return 0;
+					return Memory(MemoryRegion::SETONLY, 0, 0);
 				}
 				break;
 
@@ -266,24 +273,24 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 				{
 					if (!set)
 					{
-						return interruptEnableFlag;
+						return Memory(MemoryRegion::INTERRUPTFLAG, interruptEnableFlag, addr);
 					}
 					else
 					{
 						interruptEnableFlag = val;
-						return 0;
+						return Memory(MemoryRegion::SETONLY, 0, 0);
 					}
 				}
 				else
 				{
 					if (!set)
 					{
-						return highRam[addr & 0x007F];
+						return Memory(MemoryRegion::HIGHRAM, highRam[addr & 0x007F], addr);
 					}
 					else
 					{
 						highRam[addr & 0x007F] = val;
-						return 0;
+						return Memory(MemoryRegion::SETONLY, 0, 0);
 					}
 				}
 				break;
@@ -296,5 +303,5 @@ uint8_t MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 	}
 
-	throw std::logic_error("ERROR IN RAM. COULD NOT FIND AN APPROPRIATE LOCATION FOR THE ADDRESS GIVEN " + addr);
+	throw std::logic_error("ERROR IN RAM. COULD NOT FIND AN APPROPRIATE LOCATION FOR THE GIVEN ADDRESS");
 }

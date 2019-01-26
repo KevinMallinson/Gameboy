@@ -4,13 +4,14 @@
 #include <iostream>
 #include <stdexcept>
 #include "GPU.h"
+#include "Memory.h"
 
 class MMU
 {
 public:
 	MMU(GPU * gpuRef);
-	uint8_t GetByte(uint16_t addr);
-	uint16_t GetWord(uint16_t addr);
+	Memory GetByte(uint16_t addr);
+	Memory GetWord(uint16_t addr);
 
 	void WriteByte(uint16_t addr, uint8_t val);
 	void WriteWord(uint16_t addr, uint16_t val);
@@ -39,7 +40,7 @@ private:
 	uint8_t     highRam [0x007F]; //127 bytes
 	uint8_t  interruptEnableFlag; //One byte for Interrupt Enable Register
 
-	uint8_t SetOrGetMemory(uint16_t addr, uint8_t val, bool set);
+	Memory SetOrGetMemory(uint16_t addr, uint8_t val, bool set);
 
 	//Note: VideoRam and SpriteAttributeTable will be in GPU.
 	GPU * gpu;

@@ -22,12 +22,14 @@
     <ClInclude Include="Headers\CPU.h" />
     <ClInclude Include="Headers\GPU.h" />
     <ClInclude Include="Headers\InstructionSet.h" />
+    <ClInclude Include="Headers\Memory.h" />
     <ClInclude Include="Headers\MMU.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InstructionSet.cpp" />
     <ClCompile Include="Source\CPU.cpp" />
     <ClCompile Include="Source\GPU.cpp" />
+    <ClCompile Include="Source\Memory.cpp" />
     <ClCompile Include="Source\MMU.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
