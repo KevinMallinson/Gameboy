@@ -17,16 +17,6 @@ MMU::MMU(GPU * gpuPtr) :gpu(gpuPtr)
 		workRam[i] = 0;
 	}
 
-	for (int i = 0; i < 0x1E00; i++)
-	{
-		echoRam[i] = 0;
-	}
-
-	for (int i = 0; i < 0x0060; i++)
-	{
-		unused[i] = 0;
-	}
-
 	for (int i = 0; i < 0x0080; i++)
 	{
 		ioRegisters[i] = 0;
@@ -45,8 +35,9 @@ MMU::MMU(GPU * gpuPtr) :gpu(gpuPtr)
 	@param addr the memory address to read
 	@return the byte at the given address
 */
-Memory MMU::GetByte(uint16_t addr)
+Memory MMU::GetByte(int addr)
 {
+	assert(addr >= 0 && addr <= 0xFFFF);
 	return SetOrGetMemory(addr, 0, false);
 }
 
@@ -55,8 +46,9 @@ Memory MMU::GetByte(uint16_t addr)
 	@param addr the memory address to write to
 	@param val the byte to write
 */
-void MMU::WriteByte(uint16_t addr, uint8_t val)
+void MMU::WriteByte(int addr, uint8_t val)
 {
+	assert(addr >= 0 && addr <= 0xFFFF);
 	SetOrGetMemory(addr, val, true);
 }
 
@@ -65,17 +57,15 @@ void MMU::WriteByte(uint16_t addr, uint8_t val)
 	@param addr the memory address to read
 	@return the word at the given address
 */
-Memory MMU::GetWord(uint16_t addr)
+Memory MMU::GetWord(int addr)
 {
+	assert(addr >= 0 && addr <= 0xFFFF);
+
 	//its stored in our RAM implementation in little endian
 	Memory msb = GetByte(addr + 1); //higher address contains most significant byte
 	Memory lsb = GetByte(addr); //lower address contains least significant byte
 
-	if (msb.Region() != lsb.Region())
-	{
-		throw std::logic_error("WORD IS COMPRISED OF TWO DISTINCT MEMORY REGIONS");
-	}
-
+	assert(msb.Region() == lsb.Region());
 	return Memory(msb.Region(), (msb.Byte() << 8) | lsb.Byte(), addr);
 }
 
@@ -84,8 +74,10 @@ Memory MMU::GetWord(uint16_t addr)
 	@param addr the memory address to write to
 	@param val the word to write
 */
-void MMU::WriteWord(uint16_t addr, uint16_t val)
+void MMU::WriteWord(int addr, uint16_t val)
 {
+	assert(addr >= 0 && addr <= 0xFFFF);
+
 	//Store in little endian
 	WriteByte(addr, val & 0x00FF); //least significant byte in lower address
 	WriteByte(addr+1, val >> 8); //most significant byte in higher address
@@ -101,7 +93,6 @@ void MMU::WriteWord(uint16_t addr, uint16_t val)
 Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 {
 	//Using memory map at http://gbdev.gg8.se/wiki/articles/Memory_Map
-	uint8_t byte = 0;
 	switch (addr & 0xF000)
 	{
 
@@ -115,7 +106,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 		else
 		{
 			romBank[addr] = val;
-			return Memory(MemoryRegion::SETONLY, 0, 0);
+			return Memory();
 		}
 		break;
 
@@ -129,7 +120,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 		else
 		{
 			gpu->SetVideoRam(addr & 0x1FFF, val);
-			return Memory(MemoryRegion::SETONLY, 0, 0);
+			return Memory();
 		}
 		break;
 
@@ -146,7 +137,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 		else
 		{
 			externalRam[addr & 0x1FFF] = val;
-			return Memory(MemoryRegion::SETONLY, 0, 0);
+			return Memory();
 		}
 		break;
 
@@ -160,7 +151,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 		else
 		{
 			workRam[addr & 0x1FFF] = val;
-			return Memory(MemoryRegion::SETONLY, 0, 0);
+			return Memory();
 		}
 		break;
 
@@ -168,12 +159,12 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set)
 		{
-			return Memory(MemoryRegion::ECHORAM, echoRam[addr & 0x1FFF], addr); //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
+			return Memory(MemoryRegion::ECHORAM, workRam[addr & 0x1FFF], addr);
 		}
 		else
 		{
-			echoRam[addr & 0x1FFF] = val;
-			return Memory(MemoryRegion::SETONLY, 0, 0);
+			workRam[addr & 0x1FFF] = val;
+			return Memory();
 		}
 		break;
 
@@ -187,12 +178,12 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 			if (!set)
 			{
-				return Memory(MemoryRegion::ECHORAM, echoRam[addr & 0x1FFF], addr); //This can actually produce some out of range values (since it's actually 7.5kb and not 8kb)
+				return Memory(MemoryRegion::ECHORAM, workRam[addr & 0x1FFF], addr);
 			}
 			else
 			{
-				echoRam[addr & 0x1FFF] = val;
-				return Memory(MemoryRegion::SETONLY, 0, 0);
+				workRam[addr & 0x1FFF] = val;
+				return Memory();
 			}
 			break;
 
@@ -211,25 +202,13 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 				else
 				{
 					gpu->SetSpriteAttributeTable(addr & 0x00FF, val);
-					return Memory(MemoryRegion::SETONLY, 0, 0);
+					return Memory();
 				}
 				break;
 
 			case 0xA0: case 0xB0: case 0xC0: //Not Usable
 			case 0xD0: case 0xE0: case 0xF0: //Not Usable
-
-				if (!set)
-				{
-					//Not sure if anything wrong with storing stuff here since it's technically not usable.
-					return Memory(MemoryRegion::UNUSED, unused[addr & 0x7F], addr);
-				}
-				else
-				{
-					//NOP
-					unused[addr & 0x7F] = val;
-					return Memory(MemoryRegion::SETONLY, 0, 0);
-				}
-
+				return Memory(MemoryRegion::UNUSED, 0, 0);
 				break;
 			}
 
@@ -249,7 +228,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 				else
 				{
 					ioRegisters[addr & 0x007F] = val;
-					return Memory(MemoryRegion::SETONLY, 0, 0);
+					return Memory();
 				}
 				break;
 
@@ -263,13 +242,13 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 				else
 				{
 					highRam[addr & 0x007F] = val;
-					return Memory(MemoryRegion::SETONLY, 0, 0);
+					return Memory();
 				}
 				break;
 
 			case 0xF0:
 				//if the last nibble is not F, it is still high ram, else it's the interrupts enable register
-				if (addr & 0x000F == 0x000F)
+				if ((addr & 0x000F) == 0x000F)
 				{
 					if (!set)
 					{
@@ -278,7 +257,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 					else
 					{
 						interruptEnableFlag = val;
-						return Memory(MemoryRegion::SETONLY, 0, 0);
+						return Memory();
 					}
 				}
 				else
@@ -290,7 +269,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 					else
 					{
 						highRam[addr & 0x007F] = val;
-						return Memory(MemoryRegion::SETONLY, 0, 0);
+						return Memory();
 					}
 				}
 				break;
@@ -303,5 +282,5 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 	}
 
-	throw std::logic_error("ERROR IN RAM. COULD NOT FIND AN APPROPRIATE LOCATION FOR THE GIVEN ADDRESS");
+	assert("" == "UNUSED MEMORY TRIGGERED");
 }

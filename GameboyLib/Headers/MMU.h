@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <cassert>
 #include "GPU.h"
 #include "Memory.h"
 
@@ -10,11 +11,15 @@ class MMU
 {
 public:
 	MMU(GPU * gpuRef);
-	Memory GetByte(uint16_t addr);
-	Memory GetWord(uint16_t addr);
+	/*
+	NOTE: These use int instead of uint16_t for the address, because I want to make sure no invalid addresses
+	are ever fed to it. We use assert to terminate if an invalid address is given
+	*/
+	Memory GetByte(int addr);
+	Memory GetWord(int addr);
 
-	void WriteByte(uint16_t addr, uint8_t val);
-	void WriteWord(uint16_t addr, uint16_t val);
+	void WriteByte(int addr, uint8_t val);
+	void WriteWord(int addr, uint16_t val);
 
 private:
 	//Start		End		Description						Notes																	//Implementation
@@ -34,8 +39,6 @@ private:
 	uint8_t     romBank [0x8000]; //32kb
 	uint8_t externalRam [0x2000]; //8kb external ram
 	uint8_t     workRam [0x2000]; //8kb - next to eachother - can combine
-	uint8_t     echoRam [0x1E00]; //7.5kb - this echos the entire work ram. It's slightly less size. Why? Also, apparently this is usually unused.
-	uint8_t      unused [0x0060]; //96 bytes unused
 	uint8_t ioRegisters [0x0080]; //128 bytes
 	uint8_t     highRam [0x007F]; //127 bytes
 	uint8_t  interruptEnableFlag; //One byte for Interrupt Enable Register
