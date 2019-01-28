@@ -24,23 +24,10 @@ Memory::Memory(MemoryRegion reg, uint16_t byteOrWord, uint16_t addr)
 	}
 }
 
-uint8_t Memory::Byte()
+//Technically, it will return a word, but the caller should define its size
+//so if it's uint8_t, only the last 8 bits are used.
+uint16_t Memory::Data()
 {
-	if (!isByte)
-	{
-		throw std::logic_error("ATTEMPTING TO GET A BYTE, WHEN THE DATA IS ACTUALLY A WORD");
-	}
-
-	return data;
-}
-
-uint16_t Memory::Word()
-{
-	if (isByte)
-	{
-		throw std::logic_error("ATTEMPTING TO GET A WORD, WHEN THE DATA IS ACTUALLY A BYTE");
-	}
-
 	return data;
 }
 

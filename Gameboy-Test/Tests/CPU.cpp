@@ -5,7 +5,7 @@
 #include "../../GameboyLib/Headers/CPU.h"
 
 TEST(Processor, InitRegistersNormal) {
-	CPU cpu;
+	CPU cpu(nullptr);
 
 	//Some pretty normal inputs
 	cpu.SetA(255);
@@ -19,7 +19,7 @@ TEST(Processor, InitRegistersNormal) {
 }
 
 TEST(Processor, SetRegPairsNormal) {
-	CPU cpu;
+	CPU cpu(nullptr);
 
 	cpu.SetAF(65535);		//0b1111111111111111 --> 0b1111111111110000 (4 last bits are ALWAYS zero)
 	cpu.SetBC(0);			//0b0000000000000000
@@ -48,7 +48,7 @@ TEST(Processor, SetRegPairsNormal) {
 }
 
 TEST(Processor, GetRegPairsNormal) {
-	CPU cpu;
+	CPU cpu(nullptr);
 
 	cpu.SetAF(65535); //0b1111111111111111 --> 0b1111111111110000 (4 last bits are ALWAYS zero)
 	cpu.SetBC(0);
@@ -62,7 +62,7 @@ TEST(Processor, GetRegPairsNormal) {
 }
 
 TEST(Processor, RegistersViaArray) {
-	CPU cpu;
+	CPU cpu(nullptr);
 
 	//Set some normal registers
 	cpu.SetA(255);
@@ -101,7 +101,7 @@ TEST(Processor, RegistersViaArray) {
 //Just a test to make sure the reference is working right
 //no need to test all registers
 TEST(Processor, SetRegistersViaArray) {
-	CPU cpu;
+	CPU cpu(nullptr);
 	*cpu.Registers()[(int)REG::A] = 139;
 	EXPECT_EQ((uint8_t)cpu.GetA(), 139);
 }

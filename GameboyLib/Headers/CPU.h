@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "InstructionSet.h"
+#include "MMU.h"
 #include <vector>
 
 //B, C, D, E, H, L, F, A
@@ -18,7 +19,7 @@ enum class REG {
 class CPU : InstructionSet
 {
 public:
-	CPU();
+	CPU(MMU * mmu);
 	~CPU();
 
 	//Setters (for register pairs)
@@ -80,6 +81,6 @@ private:
 
 	//If you are using this CPU emulator, it's up to you to include an implementation of RAM.
 	//The CPU does not contain ram, it merely contains a reference to the RAM.
-	//Also, the CPU does not destroy the RAM when it terminates. That's the enclosing computers responsibility. 
-	uint8_t * RAM;
+	//Also, the CPU does not destroy the RAM when it terminates.
+	MMU * mmu;
 };

@@ -3,7 +3,7 @@
 #include "../../GameboyLib/Headers/GPU.h"
 
 // Note: We will test the GPU memory stuff here too.
-TEST(MMUandGPU, Init) 
+TEST(MMU, Init) 
 {
 	GPU * gpu = new GPU();
 	MMU mmu(gpu);
@@ -22,18 +22,18 @@ TEST(MMUandGPU, Init)
 		{
 			//Unused RAM always returns 0 and disallows being set.
 			//TODO: Anything we should actually do instead?
-			EXPECT_EQ(val.Byte(), 0);
+			EXPECT_EQ(val.Data(), 0);
 		}
 		else
 		{
-			EXPECT_EQ(val.Byte(), 237);
+			EXPECT_EQ(val.Data(), 237);
 		}
 	}
 
 	delete gpu;
 }
 
-TEST(MMUandGPU, TestEachSection)
+TEST(MMU, TestEachSection)
 {
 	GPU * gpu = new GPU();
 	MMU mmu(gpu);
@@ -93,19 +93,19 @@ TEST(MMUandGPU, TestEachSection)
 		if (i >= 0x0000 && i <= 0x7FFF)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 33);
+			EXPECT_EQ(byte.Data(), 33);
 			EXPECT_EQ(byte.Region(), MemoryRegion::ROMBANK);
 		}
 		else if (i >= 0x8000 && i <= 0x9FFF)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 44);
+			EXPECT_EQ(byte.Data(), 44);
 			EXPECT_EQ(byte.Region(), MemoryRegion::VIDEORAM);
 		}
 		else if (i >= 0xA000 && i <= 0xBFFF)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 55);
+			EXPECT_EQ(byte.Data(), 55);
 			EXPECT_EQ(byte.Region(), MemoryRegion::EXTERNALRAM);
 		}
 		else if (i >= 0xC000 && i <= 0xDFFF)
@@ -115,11 +115,11 @@ TEST(MMUandGPU, TestEachSection)
 			Memory byte = mmu.GetByte(i);
 			if (j < 0x1E00)
 			{
-				EXPECT_EQ(byte.Byte(), 77);
+				EXPECT_EQ(byte.Data(), 77);
 			}
 			else
 			{
-				EXPECT_EQ(byte.Byte(), 66);
+				EXPECT_EQ(byte.Data(), 66);
 			}
 
 			EXPECT_EQ(byte.Region(), MemoryRegion::WORKRAM);
@@ -128,13 +128,13 @@ TEST(MMUandGPU, TestEachSection)
 		else if (i >= 0xE000 && i <= 0xFDFF)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 77);
+			EXPECT_EQ(byte.Data(), 77);
 			EXPECT_EQ(byte.Region(), MemoryRegion::ECHORAM);
 		}
 		else if (i >= 0xFE00 && i <= 0xFE9F)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 88);
+			EXPECT_EQ(byte.Data(), 88);
 			EXPECT_EQ(byte.Region(), MemoryRegion::SPRITEATTRIBUTETABLE);
 		}
 		else if (i >= 0xFEA0 && i <= 0xFEFF)
@@ -142,30 +142,51 @@ TEST(MMUandGPU, TestEachSection)
 			//Unused RAM always returns 0 and disallows being set.
 			//TODO: Anything we should actually do instead?
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 0);
+			EXPECT_EQ(byte.Data(), 0);
 			EXPECT_EQ(byte.Region(), MemoryRegion::UNUSED);
 		}
 		else if (i >= 0xFF00 && i <= 0xFF7F)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 110);
+			EXPECT_EQ(byte.Data(), 110);
 			EXPECT_EQ(byte.Region(), MemoryRegion::IOREGISTERS);
 		}
 		else if (i >= 0xFF80 && i <= 0xFFFE)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 121);
+			EXPECT_EQ(byte.Data(), 121);
 			EXPECT_EQ(byte.Region(), MemoryRegion::HIGHRAM);
 		}
 		else if (i == 0xFFFF)
 		{
 			Memory byte = mmu.GetByte(i);
-			EXPECT_EQ(byte.Byte(), 132);
+			EXPECT_EQ(byte.Data(), 132);
 			EXPECT_EQ(byte.Region(), MemoryRegion::INTERRUPTFLAG);
 		}
 	}
 
 
+
+	delete gpu;
+}
+
+
+TEST(MMU, Words)
+{
+	GPU * gpu = new GPU();
+	MMU mmu(gpu);
+
+	mmu.WriteWord(0x0, 0xFECF);
+	uint16_t word = mmu.GetWord(0x0).Data();
+
+	EXPECT_EQ(word, 0xFECF);
+
+	//Little endian, LS byte at lower address
+	uint8_t lsb = mmu.GetByte(0x0).Data();
+	uint8_t msb = mmu.GetByte(0x1).Data();
+
+	EXPECT_EQ(lsb, 0xCF);
+	EXPECT_EQ(msb, 0xFE);
 
 	delete gpu;
 }

@@ -66,7 +66,7 @@ Memory MMU::GetWord(int addr)
 	Memory lsb = GetByte(addr); //lower address contains least significant byte
 
 	assert(msb.Region() == lsb.Region());
-	return Memory(msb.Region(), (msb.Byte() << 8) | lsb.Byte(), addr);
+	return Memory(msb.Region(), (msb.Data() << 8) | lsb.Data(), addr);
 }
 
 /**
@@ -115,7 +115,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 		if (!set)
 		{
-			return Memory(MemoryRegion::VIDEORAM, gpu->GetVideoRam(addr & 0x1FFF).Byte(), addr);
+			return Memory(MemoryRegion::VIDEORAM, gpu->GetVideoRam(addr & 0x1FFF).Data(), addr);
 		}
 		else
 		{
@@ -197,7 +197,7 @@ Memory MMU::SetOrGetMemory(uint16_t addr, uint8_t val, bool set)
 
 				if (!set)
 				{
-					return Memory(MemoryRegion::SPRITEATTRIBUTETABLE, gpu->GetSpriteAttributeTable(addr & 0x00FF).Byte(), addr);
+					return Memory(MemoryRegion::SPRITEATTRIBUTETABLE, gpu->GetSpriteAttributeTable(addr & 0x00FF).Data(), addr);
 				}
 				else
 				{

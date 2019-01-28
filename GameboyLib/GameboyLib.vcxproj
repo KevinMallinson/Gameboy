@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Headers\CPU.h" />
     <ClInclude Include="Headers\GPU.h" />
+    <ClInclude Include="Headers\Host.h" />
     <ClInclude Include="Headers\InstructionSet.h" />
     <ClInclude Include="Headers\Memory.h" />
     <ClInclude Include="Headers\MMU.h" />
@@ -29,6 +30,7 @@
     <ClCompile Include="InstructionSet.cpp" />
     <ClCompile Include="Source\CPU.cpp" />
     <ClCompile Include="Source\GPU.cpp" />
+    <ClCompile Include="Source\Host.cpp" />
     <ClCompile Include="Source\Memory.cpp" />
     <ClCompile Include="Source\MMU.cpp" />
   </ItemGroup>

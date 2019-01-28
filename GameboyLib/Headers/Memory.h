@@ -23,7 +23,7 @@ public:
 	Memory(); //default constructor is set only
 	Memory(MemoryRegion reg, uint16_t byteOrWord, uint16_t addr);
 	uint8_t Byte();
-	uint16_t Word();
+	uint16_t Data();
 	MemoryRegion Region();
 
 private:

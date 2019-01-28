@@ -1,6 +1,6 @@
 #include "../Headers/CPU.h"
 
-CPU::CPU()
+CPU::CPU(MMU * memUnit) : mmu(memUnit)
 {
 	//Initialize our registers
 	regA = new uint8_t(0);

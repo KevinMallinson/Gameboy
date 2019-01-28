@@ -46,7 +46,7 @@
   <ItemGroup>
     <ClCompile Include="Tests\CPU.cpp" />
     <ClCompile Include="Tests\InstructionSet.cpp" />
-    <ClCompile Include="Tests\MMU-GPU.cpp" />
+    <ClCompile Include="Tests\MMU.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\googletest.h" />
