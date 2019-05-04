@@ -10,6 +10,6 @@ Implemented Opcodes are marked as finished by using a red diagonal line.
 
 ![Standard Instructions](opcodes.png)
 
-##Prefix CB
+## Prefix CB
 
 ![Prefix CB](prefixcb.png)
