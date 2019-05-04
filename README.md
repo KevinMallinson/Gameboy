@@ -8,8 +8,8 @@ Implemented Opcodes are marked as finished by using a red diagonal line.
 
 ## Standard Instructions
 
-![Standard Instructions]("standard instructions.png")
+![Standard Instructions](opcodes.png)
 
 ##Prefix CB
 
-![Prefix CB]("prefix cb.png")
+![Prefix CB](prefixcb.png)
