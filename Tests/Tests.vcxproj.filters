@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="CPU\InstructionSet.cpp">
+      <Filter>CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="CPU\CPU.cpp">
+      <Filter>CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="MMU\MMU.cpp">
+      <Filter>MMU</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CPU">
+      <UniqueIdentifier>{b9dd7a73-cb21-499c-988a-fcc0c206136d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MMU">
+      <UniqueIdentifier>{c42dec35-28c9-4a64-a1fe-037339a2a5c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Headers\googletest.h" />
+  </ItemGroup>
+</Project>
