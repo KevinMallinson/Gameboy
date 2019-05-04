@@ -72,24 +72,24 @@ TEST(Processor, RegistersViaArray) {
 	cpu.SetDE(10631);
 
 	//We can test A,F,H,L as-is.
-	uint8_t A = *cpu.Registers()[(int)REG::A];
-	uint8_t F = *cpu.Registers()[(int)REG::F];
+	uint8_t A = *cpu.Registers()[REG::A];
+	uint8_t F = *cpu.Registers()[REG::F];
 	EXPECT_EQ(A, 255);
 	EXPECT_EQ(F, 0); //0b00001110 --> 0b00000000
 
-	uint8_t H = *cpu.Registers()[(int)REG::H];
-	uint8_t L = *cpu.Registers()[(int)REG::L];
+	uint8_t H = *cpu.Registers()[REG::H];
+	uint8_t L = *cpu.Registers()[REG::L];
 	EXPECT_EQ(H, 30);
 	EXPECT_EQ(L, 111);
 
 	//These next two are pairs, so we get the first and last 8 bits
-	uint8_t B = *cpu.Registers()[(int)REG::B];
-	uint8_t C = *cpu.Registers()[(int)REG::C];
+	uint8_t B = *cpu.Registers()[REG::B];
+	uint8_t C = *cpu.Registers()[REG::C];
 	EXPECT_EQ(B, 0b10010110);		//[10010110] 01010011
 	EXPECT_EQ(C, 0b01010011);		// 10010110 [01010011]
 
-	uint8_t D = *cpu.Registers()[(int)REG::D];
-	uint8_t E = *cpu.Registers()[(int)REG::E];
+	uint8_t D = *cpu.Registers()[REG::D];
+	uint8_t E = *cpu.Registers()[REG::E];
 								
 	EXPECT_EQ(D, 0b00101001);		//[00101001] 10000111
 	EXPECT_EQ(E, 0b10000111);		// 00101001 [10000111]
@@ -99,6 +99,6 @@ TEST(Processor, RegistersViaArray) {
 //no need to test all registers
 TEST(Processor, SetRegistersViaArray) {
 	CPU cpu(nullptr);
-	*cpu.Registers()[(int)REG::A] = 139;
+	*cpu.Registers()[REG::A] = 139;
 	EXPECT_EQ((uint8_t)cpu.GetA(), 139);
 }

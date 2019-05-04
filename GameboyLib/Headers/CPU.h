@@ -5,7 +5,7 @@
 #include <vector>
 
 //B, C, D, E, H, L, F, A
-enum class REG {
+enum REG {
 	B = 0,
 	C = 1,
 	D = 2,
@@ -16,7 +16,7 @@ enum class REG {
 	A = 7
 };
 
-class CPU : InstructionSet
+class CPU : public InstructionSet
 {
 public:
 	CPU(MMU * mmu);
@@ -60,7 +60,7 @@ public:
 
 private:
 	//Let's define our registers... They are pointers so we can store them in a vector and have them stay consistent
-//THEY CAN UNDERFLOW/OVERFLOW/WRAP WITHOUT CAUSING PROBLEMS
+	//THEY CAN UNDERFLOW/OVERFLOW/WRAP WITHOUT CAUSING PROBLEMS
 	uint8_t * regA;
 	uint8_t * regB;
 	uint8_t * regC;
